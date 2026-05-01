@@ -23,7 +23,8 @@ class FlowDaemon:
         self.language = os.getenv("FLOW_LANGUAGE", "en")
         self.recorder = Recorder()
         self.engine = WhisperEngine(model_name=self.model_name)
-        self.storage = Storage(Path(".flow") / "history.db")
+        db_path = os.getenv("FLOW_DATABASE_PATH", Path(".flow") / "history.db")
+        self.storage = Storage(Path(db_path))
         self.clients: set[ServerConnection] = set()
         self.current_session_id: int | None = None
 

@@ -5,14 +5,28 @@ const modelName = document.getElementById('modelName');
 const languageName = document.getElementById('languageName');
 const toggleButton = document.getElementById('toggleButton');
 const refreshButton = document.getElementById('refreshButton');
+const lede = document.querySelector('.lede');
 
 async function refresh() {
-  const [state, items] = await Promise.all([
+  const [state, items, config] = await Promise.all([
     window.flowApi.getState(),
     window.flowApi.listHistory(100),
+    window.flowApi.getConfig(),
   ]);
   renderState(state);
   renderItems(items);
+  renderConfig(config);
+}
+
+function renderState(state) {
+  recordingState.textContent = state.recording ? 'Recording' : 'Idle';
+  modelName.textContent = state.model;
+  languageName.textContent = state.language;
+  toggleButton.textContent = state.recording ? 'Stop Dictation' : 'Start Dictation';
+}
+
+function renderConfig(config) {
+  lede.textContent = `Toggle dictation with ${config.hotkey}, then browse and reuse transcripts here.`;
 }
 
 function renderState(state) {

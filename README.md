@@ -11,8 +11,8 @@ Lightweight Windows dictation app scaffold built around Electron, a local Python
 
 ## Current MVP behavior
 
-- Press `Ctrl+Shift+Space` to start recording
-- Press `Ctrl+Shift+Space` again to stop recording and transcribe
+- Press `Ctrl+Alt=D` to start recording
+- Press `Ctrl+Alt=D` again to stop recording and transcribe
 - Final transcript is injected into the active window when AutoHotkey is available
 - Every utterance is stored and browsable in the history window
 
@@ -57,7 +57,6 @@ uv run python -m flow_daemon.server
 
 ## Suggested next improvements
 
-- Add push-to-talk key down and key up handling via a native hotkey helper
 - Stream partial transcripts while recording
 - Add real VAD segmentation instead of whole-utterance transcription on stop
 - Save focused app metadata with each utterance

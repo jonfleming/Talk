@@ -6,6 +6,7 @@ const { spawn } = require('node:child_process');
 const { app, BrowserWindow, Menu, Tray, globalShortcut, ipcMain, nativeImage, Notification, clipboard } = require('electron');
 const WebSocket = require('ws');
 const config = require('./config');
+const ahkPathDefault = String.raw`C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe`;
 
 const DAEMON_HOST = '127.0.0.1';
 const DEFAULT_DAEMON_PORT = 8765;
@@ -16,6 +17,7 @@ let cfg = config.load();
 let tray = null;
 let historyWindow = null;
 let daemonProcess = null;
+let hotkeyProcess = null;
 let socket = null;
 let socketOpen = false;
 let requestSequence = 0;
@@ -184,6 +186,7 @@ function startDaemon() {
     env: {
       ...process.env,
       FLOW_DAEMON_PORT: String(daemonPort),
+      FLOW_DATABASE_PATH: path.join(app.getPath('userData'), 'flow.db'),
     },
   });
 
@@ -209,6 +212,50 @@ function startDaemon() {
     daemonFailure = new Error(`Flow daemon exited with code ${code ?? 'unknown'}. Check the terminal for the startup error.`);
     currentState = { ...currentState, connected: false, startupError: daemonFailure.message };
     broadcastState();
+  });
+}
+
+function startHotkey() {
+  let ahkPath = process.env.FLOW_AHK_PATH;
+  if (!ahkPath) {
+    // Try common paths
+    const possiblePaths = [
+      'AutoHotkey.exe', // On PATH
+      String.raw`C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe`,
+      String.raw`C:\Program Files\AutoHotkey\AutoHotkey.exe`, // v1 fallback
+    ];
+    for (const path of possiblePaths) {
+      if (fs.existsSync(path)) {
+        ahkPath = path;
+        break;
+      }
+    }
+  }
+  if (!ahkPath) {
+    console.error('AutoHotkey not found. Hotkey functionality will not work.');
+    return;
+  }
+
+  const scriptPath = path.join(app.getAppPath(), 'scripts', 'hotkey.ahk');
+
+  if (!fs.existsSync(scriptPath)) {
+    console.error('Hotkey script not found:', scriptPath);
+    return;
+  }
+
+  hotkeyProcess = spawn(ahkPath, [scriptPath], {
+    cwd: app.getAppPath(),
+    stdio: 'pipe',
+    windowsHide: true,
+  });
+
+  hotkeyProcess.on('error', (error) => {
+    console.error(`Failed to start hotkey AHK: ${error.message}`);
+  });
+
+  hotkeyProcess.on('exit', (code) => {
+    console.error(`Hotkey AHK exited with code ${code ?? 'unknown'}`);
+    hotkeyProcess = null;
   });
 }
 
@@ -371,7 +418,26 @@ async function handleTranscript(transcript) {
 }
 
 async function injectText(text) {
-  const ahkPath = process.env.FLOW_AHK_PATH || 'AutoHotkey.exe';
+  let ahkPath = process.env.FLOW_AHK_PATH;
+  if (!ahkPath) {
+    // Try common paths
+    const possiblePaths = [
+      'AutoHotkey.exe', // On PATH
+      String.raw`C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe`,
+      String.raw`C:\Program Files\AutoHotkey\AutoHotkey.exe`, // v1 fallback
+    ];
+    for (const path of possiblePaths) {
+      if (fs.existsSync(path)) {
+        ahkPath = path;
+        break;
+      }
+    }
+  }
+  if (!ahkPath) {
+    clipboard.writeText(text);
+    return false;
+  }
+
   const scriptPath = path.join(app.getAppPath(), 'scripts', 'inject.ahk');
 
   if (!fs.existsSync(scriptPath)) {
@@ -446,11 +512,19 @@ app.on('before-quit', () => {
   if (daemonProcess) {
     daemonProcess.kill();
   }
+  if (hotkeyProcess) {
+    hotkeyProcess.kill();
+  }
+});
+
+app.on('window-all-closed', () => {
+  // Prevent app quit when windows are closed, since we have a tray icon
 });
 
 app.whenReady().then(async () => {
   daemonPort = await findAvailablePort();
   startDaemon();
+  startHotkey();
   createTray();
   setupIpc();
   registerHotkeys();
