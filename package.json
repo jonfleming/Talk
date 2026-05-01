@@ -1,0 +1,18 @@
+{
+  "name": "flow-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lightweight Windows dictation app with Electron, faster-whisper, and AutoHotkey injection.",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "daemon": "uv run python -m flow_daemon.server"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "electron": "^41.3.0"
+  }
+}

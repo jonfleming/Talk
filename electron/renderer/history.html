@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flow History</title>
+    <link rel="stylesheet" href="./history.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Flow</p>
+          <h1>Dictation History</h1>
+          <p class="lede">Toggle dictation with Ctrl+Shift+Space, then browse and reuse transcripts here.</p>
+        </div>
+        <div class="controls">
+          <button id="toggleButton" class="primary">Toggle Dictation</button>
+          <button id="refreshButton">Refresh</button>
+        </div>
+      </header>
+
+      <section class="statusCard">
+        <div>
+          <span class="label">Recorder</span>
+          <strong id="recordingState">Idle</strong>
+        </div>
+        <div>
+          <span class="label">Model</span>
+          <strong id="modelName">small.en</strong>
+        </div>
+        <div>
+          <span class="label">Language</span>
+          <strong id="languageName">en</strong>
+        </div>
+      </section>
+
+      <section>
+        <div id="emptyState" class="empty" hidden>No transcripts yet. Record a short utterance to populate history.</div>
+        <div id="historyList" class="historyList"></div>
+      </section>
+    </main>
+
+    <script src="./history.js"></script>
+  </body>
+</html>
