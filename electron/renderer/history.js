@@ -5,28 +5,40 @@ const modelName = document.getElementById('modelName');
 const languageName = document.getElementById('languageName');
 const toggleButton = document.getElementById('toggleButton');
 const refreshButton = document.getElementById('refreshButton');
-const lede = document.querySelector('.lede');
+const hotkeyDisplay = document.getElementById('hotkeyDisplay');
+const liveTranscriptSection = document.getElementById('liveTranscriptSection');
+const liveTranscriptText = document.getElementById('liveTranscriptText');
+
+// Initialize with defaults
+renderConfig({ hotkey: 'Ctrl+Alt+D', model: 'small.en', language: 'en', injectionMode: 'autohotkey' });
 
 async function refresh() {
-  const [state, items, config] = await Promise.all([
-    window.flowApi.getState(),
-    window.flowApi.listHistory(100),
-    window.flowApi.getConfig(),
-  ]);
-  renderState(state);
-  renderItems(items);
-  renderConfig(config);
-}
-
-function renderState(state) {
-  recordingState.textContent = state.recording ? 'Recording' : 'Idle';
-  modelName.textContent = state.model;
-  languageName.textContent = state.language;
-  toggleButton.textContent = state.recording ? 'Stop Dictation' : 'Start Dictation';
+  try {
+    const [state, items, config] = await Promise.all([
+      window.flowApi.getState().catch(() => ({ recording: false, model: 'small.en', language: 'en' })),
+      window.flowApi.listHistory(100).catch(() => []),
+      window.flowApi.getConfig().catch(() => ({ hotkey: 'Ctrl+Alt+D', model: 'small.en', language: 'en', injectionMode: 'autohotkey' })),
+    ]);
+    renderState(state);
+    renderItems(items);
+    renderConfig(config);
+  } catch (error) {
+    console.error('Error refreshing history:', error);
+    // Fallback: try to get config at least
+    try {
+      const config = await window.flowApi.getConfig().catch(() => ({ hotkey: 'Ctrl+Alt+D', model: 'small.en', language: 'en', injectionMode: 'autohotkey' }));
+      renderConfig(config);
+    } catch (e) {
+      console.error('Error loading config:', e);
+    }
+  }
 }
 
 function renderConfig(config) {
-  lede.textContent = `Toggle dictation with ${config.hotkey}, then browse and reuse transcripts here.`;
+  console.log('Config loaded:', config);
+  if (config && config.hotkey) {
+    hotkeyDisplay.textContent = config.hotkey;
+  }
 }
 
 function renderState(state) {
@@ -34,6 +46,10 @@ function renderState(state) {
   modelName.textContent = state.model;
   languageName.textContent = state.language;
   toggleButton.textContent = state.recording ? 'Stop Dictation' : 'Start Dictation';
+  liveTranscriptSection.hidden = !state.recording;
+  if (!state.recording) {
+    liveTranscriptText.textContent = '';
+  }
 }
 
 function renderItems(items) {
@@ -70,6 +86,9 @@ toggleButton.addEventListener('click', async () => {
 refreshButton.addEventListener('click', refresh);
 window.flowApi.onState(renderState);
 window.flowApi.onTranscript(() => refresh());
+window.flowApi.onPartialTranscript((data) => {
+  liveTranscriptText.textContent = data.text;
+});
 
 refresh().catch((error) => {
   emptyState.hidden = false;

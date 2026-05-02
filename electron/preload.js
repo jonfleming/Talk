@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('flowApi', {
   getState: () => ipcRenderer.invoke('state:get'),
   toggleDictation: () => ipcRenderer.invoke('dictation:toggle'),
   getConfig: () => ipcRenderer.invoke('config:get'),
+  setConfig: (patch) => ipcRenderer.invoke('config:set', patch),
   onState: (handler) => {
     const listener = (_event, payload) => handler(payload);
     ipcRenderer.on('state:changed', listener);
@@ -14,5 +15,10 @@ contextBridge.exposeInMainWorld('flowApi', {
     const listener = (_event, payload) => handler(payload);
     ipcRenderer.on('transcript:final', listener);
     return () => ipcRenderer.removeListener('transcript:final', listener);
+  },
+  onPartialTranscript: (handler) => {
+    const listener = (_event, payload) => handler(payload);
+    ipcRenderer.on('transcript:partial', listener);
+    return () => ipcRenderer.removeListener('transcript:partial', listener);
   },
 });

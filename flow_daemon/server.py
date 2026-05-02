@@ -15,6 +15,7 @@ from flow_daemon.transcription import WhisperEngine
 
 STATE_CHANGED_EVENT = "state.changed"
 TRANSCRIPT_FINAL_EVENT = "transcript.final"
+TRANSCRIPT_PARTIAL_EVENT = "transcript.partial"
 
 
 class FlowDaemon:
@@ -27,6 +28,7 @@ class FlowDaemon:
         self.storage = Storage(Path(db_path))
         self.clients: set[ServerConnection] = set()
         self.current_session_id: int | None = None
+        self.streaming_task: asyncio.Task[None] | None = None
 
     async def handle(self, websocket: ServerConnection) -> None:
         self.clients.add(websocket)
@@ -79,6 +81,7 @@ class FlowDaemon:
             language=self.language,
         )
         self.recorder.start()
+        self.streaming_task = asyncio.create_task(self._stream_transcription())
         state = self._state()
         await self._broadcast(self._event(STATE_CHANGED_EVENT, state))
         return state
@@ -86,6 +89,10 @@ class FlowDaemon:
     async def _stop_dictation(self) -> dict[str, Any]:
         if not self.recorder.is_recording:
             return self._state()
+
+        if self.streaming_task:
+            self.streaming_task.cancel()
+            self.streaming_task = None
 
         session_id = self.current_session_id
         result = self.recorder.stop()
@@ -127,6 +134,34 @@ class FlowDaemon:
         await self._broadcast(self._event(STATE_CHANGED_EVENT, state))
         return {**state, "text": text, "utteranceId": utterance_id}
 
+    async def _stream_transcription(self) -> None:
+        previous_text = ""
+        try:
+            while self.recorder.is_recording:
+                await asyncio.sleep(1.0)  # Transcribe every second
+                samples = self.recorder.get_current_samples()
+                if len(samples) < 16000:  # Less than 1 second, skip
+                    continue
+                transcript = await asyncio.to_thread(self.engine.transcribe, samples, self.language)
+                text = transcript["text"].strip()
+                if text and text != previous_text:
+                    await self._broadcast(
+                        self._event(
+                            TRANSCRIPT_PARTIAL_EVENT,
+                            {
+                                "sessionId": self.current_session_id,
+                                "text": text,
+                                "language": transcript["language"],
+                            },
+                        )
+                    )
+                    previous_text = text
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            # Log error but don't crash
+            pass
+
     async def _broadcast(self, payload: dict[str, Any]) -> None:
         if not self.clients:
             return
@@ -159,7 +194,13 @@ async def run() -> None:
 
 
 def main() -> None:
-    asyncio.run(run())
+    print("Starting Flow daemon main...")
+    try:
+        print("Calling asyncio.run...")
+        asyncio.run(run())
+    except Exception as e:
+        print(f"Error in main(): {e}")
+        raise
 
 
 if __name__ == "__main__":

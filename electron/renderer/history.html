@@ -12,7 +12,7 @@
         <div>
           <p class="eyebrow">Flow</p>
           <h1>Dictation History</h1>
-          <p class="lede">Toggle dictation with Ctrl+Shift+Space, then browse and reuse transcripts here.</p>
+          <p class="lede">Toggle dictation with <span id="hotkeyDisplay">Ctrl+Alt+D</span>, then browse and reuse transcripts here.</p>
         </div>
         <div class="controls">
           <button id="toggleButton" class="primary">Toggle Dictation</button>
@@ -33,6 +33,11 @@
           <span class="label">Language</span>
           <strong id="languageName">en</strong>
         </div>
+      </section>
+
+      <section id="liveTranscriptSection" class="liveTranscript" hidden>
+        <h2>Live Transcript</h2>
+        <div id="liveTranscriptText"></div>
       </section>
 
       <section>

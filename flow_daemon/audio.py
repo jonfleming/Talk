@@ -39,6 +39,12 @@ class Recorder:
             )
             self._stream.start()
 
+    def _on_audio(self, indata: np.ndarray, frames: int, time, status) -> None:
+        """Callback for sounddevice InputStream."""
+        with self._lock:
+            if self._stream is not None:  # Only append if still recording
+                self._chunks.append(indata.copy())
+
     def stop(self) -> AudioCaptureResult:
         with self._lock:
             if self._stream is None:
@@ -57,7 +63,8 @@ class Recorder:
         duration_ms = int(len(samples) / self.samplerate * 1000)
         return AudioCaptureResult(samples=samples, duration_ms=duration_ms)
 
-    def _on_audio(self, indata, frames, time, status) -> None:
-        if status:
-            return
-        self._chunks.append(indata.copy())
+    def get_current_samples(self) -> np.ndarray:
+        with self._lock:
+            if not self._chunks:
+                return np.array([], dtype=np.float32)
+            return np.concatenate(self._chunks, axis=0).reshape(-1)

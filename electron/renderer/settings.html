@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flow Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <h1>Settings</h1>
+  <form id="settings-form">
+    <div class="setting">
+      <label for="model">Model:</label>
+      <select id="model" name="model">
+        <option value="tiny.en">Tiny (English)</option>
+        <option value="base.en">Base (English)</option>
+        <option value="small.en">Small (English)</option>
+        <option value="medium.en">Medium (English)</option>
+        <option value="large-v2">Large v2</option>
+        <option value="large-v3">Large v3</option>
+      </select>
+    </div>
+    <div class="setting">
+      <label for="hotkey">Hotkey:</label>
+      <input type="text" id="hotkey" name="hotkey" readonly>
+      <button type="button" id="set-hotkey">Set Hotkey</button>
+    </div>
+    <div class="setting">
+      <label for="injection-mode">Injection Mode:</label>
+      <select id="injection-mode" name="injectionMode">
+        <option value="autohotkey">AutoHotkey (preferred)</option>
+        <option value="clipboard">Clipboard</option>
+      </select>
+    </div>
+    <div class="setting">
+      <label for="language">Language:</label>
+      <input type="text" id="language" name="language" placeholder="en">
+    </div>
+    <button type="submit">Save</button>
+  </form>
+  <script src="settings.js"></script>
+</body>
+</html>

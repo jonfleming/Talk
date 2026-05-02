@@ -16,6 +16,7 @@ let cfg = config.load();
 
 let tray = null;
 let historyWindow = null;
+let settingsWindow = null;
 let waveformWindow = null;
 let daemonProcess = null;
 let hotkeyProcess = null;
@@ -161,6 +162,7 @@ function refreshTrayMenu() {
   const menu = Menu.buildFromTemplate([
     { label: currentState.recording ? 'Stop Dictation' : 'Start Dictation', click: toggleDictation },
     { label: 'History', click: openHistoryWindow },
+    { label: 'Settings', click: openSettingsWindow },
     { type: 'separator' },
     { label: currentState.connected ? 'Daemon: connected' : 'Daemon: starting', enabled: false },
     { label: `Hotkey: ${cfg.hotkey}`, enabled: false },
@@ -212,29 +214,95 @@ function openHistoryWindow() {
   historyWindow.loadFile(path.join(__dirname, 'renderer', 'history.html'));
 }
 
+function openSettingsWindow() {
+  if (settingsWindow) {
+    settingsWindow.show();
+    settingsWindow.focus();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 600,
+    height: 400,
+    title: 'Flow Settings',
+    autoHideMenuBar: true,
+    resizable: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  });
+
+  settingsWindow.on('closed', () => {
+    settingsWindow = null;
+  });
+
+  settingsWindow.loadFile(path.join(__dirname, 'renderer', 'settings.html'));
+}
+
 function startDaemon() {
   daemonFailure = null;
   const appPath = app.getAppPath();
+  console.log('App path:', appPath);
+  
+  // Try multiple Python executable options
+  const pythonOptions = [];
+  
+  // Check for environment variable first
+  if (process.env.FLOW_PYTHON_PATH) {
+    pythonOptions.push(process.env.FLOW_PYTHON_PATH);
+  }
+  
+  // Check local virtual environment
   const localPython = path.join(appPath, '.venv', 'Scripts', 'python.exe');
-  const pythonCommand = process.env.FLOW_PYTHON_PATH || (fs.existsSync(localPython) ? localPython : 'python');
+  if (fs.existsSync(localPython)) {
+    const resolvedPath = path.resolve(localPython);
+    console.log('Resolved Python path:', resolvedPath);
+    pythonOptions.push(resolvedPath);
+  }
+  
+  // Check common Python executables in PATH
+  pythonOptions.push('python.exe', 'python3.exe', 'py.exe', 'python');
+  
+  let pythonCommand = null;
+  for (const option of pythonOptions) {
+    if (fs.existsSync(option) || !path.isAbsolute(option)) {
+      pythonCommand = option;
+      break;
+    }
+  }
+  
+  if (!pythonCommand) {
+    const error = new Error(`No Python executable found. Tried: ${pythonOptions.join(', ')}`);
+    console.error(error.message);
+    daemonFailure = error;
+    currentState = { ...currentState, connected: false, startupError: error.message };
+    broadcastState();
+    return;
+  }
+  
+  console.log('Using Python:', pythonCommand);
 
   daemonProcess = spawn(pythonCommand, ['-m', 'flow_daemon.server'], {
     cwd: app.getAppPath(),
-    stdio: 'pipe',
+    stdio: 'pipe',  // Changed back to 'pipe' for proper event handling
     windowsHide: true,
     env: {
       ...process.env,
       FLOW_DAEMON_PORT: String(daemonPort),
       FLOW_DATABASE_PATH: path.join(app.getPath('userData'), 'flow.db'),
+      FLOW_MODEL: cfg.model,
+      FLOW_LANGUAGE: cfg.language,
     },
   });
 
+  console.log('Daemon process spawned, PID:', daemonProcess.pid);
+
   daemonProcess.stdout.on('data', (chunk) => {
-    console.log(chunk.toString().trim());
+    console.log('DAEMON:', chunk.toString().trim());
   });
 
   daemonProcess.stderr.on('data', (chunk) => {
-    console.error(chunk.toString().trim());
+    console.error('DAEMON ERROR:', chunk.toString().trim());
   });
 
   daemonProcess.on('error', (error) => {
@@ -337,6 +405,12 @@ function connectSocket(retryCount = 0) {
     if (message.event === 'transcript.final') {
       handleTranscript(message.data).catch((error) => {
         console.error(error);
+      });
+    }
+
+    if (message.event === 'transcript.partial') {
+      BrowserWindow.getAllWindows().forEach((window) => {
+        window.webContents.send('transcript:partial', message.data);
       });
     }
   });
@@ -457,6 +531,11 @@ async function handleTranscript(transcript) {
 }
 
 async function injectText(text) {
+  if (cfg.injectionMode === 'clipboard') {
+    clipboard.writeText(text);
+    return false;
+  }
+
   let ahkPath = process.env.FLOW_AHK_PATH;
   if (!ahkPath) {
     // Try common paths
@@ -508,11 +587,24 @@ async function injectText(text) {
 
 function registerHotkeys() {
   globalShortcut.unregisterAll();
-  const ok = globalShortcut.register(cfg.hotkey, () => {
+  let hotkey = cfg.hotkey;
+  
+  // Validate hotkey - must have at least one modifier
+  const parts = hotkey.split('+');
+  const hasModifier = parts.some(part => ['Ctrl', 'Alt', 'Shift', 'Meta', 'Command'].includes(part));
+  
+  if (!hasModifier || parts.length < 2) {
+    console.warn(`Invalid hotkey "${hotkey}", falling back to default`);
+    hotkey = 'Ctrl+Alt+D';
+    // Update config with valid hotkey
+    cfg = config.save({ ...cfg, hotkey });
+  }
+  
+  const ok = globalShortcut.register(hotkey, () => {
     toggleDictation().catch(() => null);
   });
   if (!ok) {
-    console.error(`Failed to register hotkey: ${cfg.hotkey}`);
+    console.error(`Failed to register hotkey: ${hotkey}`);
   }
 }
 
@@ -533,10 +625,20 @@ function setupIpc() {
   ipcMain.handle('config:get', () => cfg);
 
   ipcMain.handle('config:set', (_event, patch) => {
+    const oldCfg = { ...cfg };
     cfg = config.save(patch);
     if (patch.hotkey) {
       registerHotkeys();
       refreshTrayMenu();
+    }
+    if (patch.model || patch.language) {
+      // Restart daemon to pick up new model/language
+      if (daemonProcess) {
+        daemonProcess.kill();
+        daemonProcess = null;
+      }
+      startDaemon();
+      connectSocket();
     }
     return cfg;
   });
@@ -556,6 +658,9 @@ app.on('before-quit', () => {
   }
   if (waveformWindow) {
     waveformWindow.close();
+  }
+  if (settingsWindow) {
+    settingsWindow.close();
   }
 });
 

@@ -102,7 +102,24 @@ button.primary {
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.55);
 }
+.liveTranscript {
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+}
 
+.liveTranscript h2 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+}
+
+#liveTranscriptText {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+}
 .historyList {
   display: grid;
   gap: 14px;
