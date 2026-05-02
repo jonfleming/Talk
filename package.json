@@ -1,18 +1,52 @@
 {
   "name": "flow-desktop",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "description": "Lightweight Windows dictation app with Electron, faster-whisper, and AutoHotkey injection.",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "daemon": "uv run python -m flow_daemon.server"
+    "daemon": "uv run python -m flow_daemon.server",
+    "build": "electron-builder",
+    "dist": "electron-builder --publish=never"
   },
   "dependencies": {
     "ws": "^8.18.3"
   },
   "devDependencies": {
-    "electron": "^41.3.0"
+    "electron": "^41.3.0",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "com.flow.desktop",
+    "productName": "Flow",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "flow_daemon/**/*",
+      "scripts/**/*",
+      "pyproject.toml",
+      "uv.lock",
+      "README.md",
+      "!**/*.pyc",
+      "!**/__pycache__"
+    ],
+    "asarUnpack": [
+      "flow_daemon/**/*",
+      "pyproject.toml",
+      "uv.lock",
+      "README.md"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

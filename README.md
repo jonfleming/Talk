@@ -6,7 +6,7 @@ Lightweight Windows dictation app scaffold built around Electron, a local Python
 
 - Electron tray app with a global toggle hotkey
 - Python WebSocket daemon that records microphone audio and transcribes locally
-- SQLite-backed transcript history stored in `.flow/history.db`
+- SQLite-backed transcript history stored in `%APPDATA%\flow\flow.db`
 - AutoHotkey v2 injection bridge that pastes text into the active window
 
 ## Current MVP behavior
@@ -48,6 +48,34 @@ The Electron process will launch the Python daemon with:
 ```powershell
 uv run python -m flow_daemon.server
 ```
+
+## Packaging for distribution
+
+To build a Windows installer:
+
+```powershell
+npm run dist
+```
+
+This creates `dist/Flow Setup 0.1.0.exe`, a Windows NSIS installer that includes all necessary files.
+
+## Installation on another machine
+
+1. Install the prerequisites:
+   - Python 3.10+ (with `pip`)
+   - Node.js (for running the installer, if needed)
+   - AutoHotkey v2
+
+2. Run the installer `Flow Setup 0.1.x.exe`
+
+3. In the installation directory (default: `C:\Users\<username>\AppData\Local\Programs\flow-desktop`), install Python dependencies:
+   ```powershell
+   uv sync
+   ```
+
+4. Launch the app from the Start Menu or desktop shortcut.
+
+The app will create its database at `%APPDATA%\flow\flow.db` and config at `%APPDATA%\flow\config.json`.
 
 ## Useful environment variables
 

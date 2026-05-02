@@ -16,6 +16,7 @@ let cfg = config.load();
 
 let tray = null;
 let historyWindow = null;
+let waveformWindow = null;
 let daemonProcess = null;
 let hotkeyProcess = null;
 let socket = null;
@@ -121,6 +122,37 @@ function createTray() {
   refreshTrayMenu();
 }
 
+function createWaveformWindow() {
+  if (waveformWindow) return;
+
+  const { screen } = require('electron');
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth } = primaryDisplay.workAreaSize;
+
+  const windowWidth = 200;
+  const windowHeight = 50;
+
+  waveformWindow = new BrowserWindow({
+    width: windowWidth,
+    height: windowHeight,
+    x: Math.floor((screenWidth - windowWidth) / 2),
+    y: 0,
+    frame: false,
+    alwaysOnTop: true,
+    transparent: true,
+    resizable: false,
+    show: false,
+    focusable: false,
+    webPreferences: {},
+  });
+
+  waveformWindow.loadFile(path.join(__dirname, 'renderer', 'waveform.html'));
+
+  waveformWindow.on('closed', () => {
+    waveformWindow = null;
+  });
+}
+
 function refreshTrayMenu() {
   if (!tray) {
     return;
@@ -147,6 +179,13 @@ function broadcastState() {
   BrowserWindow.getAllWindows().forEach((window) => {
     window.webContents.send('state:changed', currentState);
   });
+
+  if (currentState.recording) {
+    if (!waveformWindow) createWaveformWindow();
+    waveformWindow.show();
+  } else {
+    if (waveformWindow) waveformWindow.hide();
+  }
 }
 
 function openHistoryWindow() {
@@ -414,7 +453,7 @@ async function handleTranscript(transcript) {
   });
 
   const body = injected ? transcript.text : 'Transcript copied to clipboard. AutoHotkey injection not available.';
-  new Notification({ title: 'Flow', body }).show();
+  new Notification({ title: 'Flow', body, silent: true }).show();
 }
 
 async function injectText(text) {
@@ -514,6 +553,9 @@ app.on('before-quit', () => {
   }
   if (hotkeyProcess) {
     hotkeyProcess.kill();
+  }
+  if (waveformWindow) {
+    waveformWindow.close();
   }
 });
 
