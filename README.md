@@ -89,7 +89,6 @@ The app will create its database at `%APPDATA%\flow\flow.db` and config at `%APP
 ## Suggested next improvements
 
 - Add settings UI for model, hotkey, and injection mode ✅
+- Save focused app metadata with each utterance
 - Stream partial transcripts while recording
 - Add real VAD segmentation instead of whole-utterance transcription on stop
-- Save focused app metadata with each utterance
-

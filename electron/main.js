@@ -351,7 +351,7 @@ function startHotkey() {
   }
 
   hotkeyProcess = spawn(ahkPath, [scriptPath], {
-    cwd: app.getAppPath(),
+    cwd: path.dirname(config.configPath()),
     stdio: 'pipe',
     windowsHide: true,
   });
@@ -642,6 +642,9 @@ function setupIpc() {
     }
     return cfg;
   });
+
+  ipcMain.handle('settings:open', () => openSettingsWindow());
+  ipcMain.handle('app:quit', () => app.quit());
 }
 
 app.on('before-quit', () => {

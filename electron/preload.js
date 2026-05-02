@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('flowApi', {
   toggleDictation: () => ipcRenderer.invoke('dictation:toggle'),
   getConfig: () => ipcRenderer.invoke('config:get'),
   setConfig: (patch) => ipcRenderer.invoke('config:set', patch),
+  openSettings: () => ipcRenderer.invoke('settings:open'),
+  quitApp: () => ipcRenderer.invoke('app:quit'),
   onState: (handler) => {
     const listener = (_event, payload) => handler(payload);
     ipcRenderer.on('state:changed', listener);
