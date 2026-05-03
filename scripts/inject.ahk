@@ -1,5 +1,20 @@
 #Requires AutoHotkey v2.0
 
+OutputLine(text)
+{
+  OutputDebug(text "`n")
+}
+
+Output(text)
+{
+  OutputDebug(text)
+}
+
+Log(text)
+{
+    OutputLine FormatTime(,"hh:mm:ss") ": " text
+}
+
 text := A_Args.Length ? A_Args[1] : ""
 if (text = "") {
     ExitApp 1

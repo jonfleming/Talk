@@ -1,6 +1,6 @@
 {
   "name": "talk",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "Lightweight Windows dictation app with Electron, faster-whisper, and AutoHotkey injection.",
   "main": "electron/main.js",
@@ -36,6 +36,7 @@
     ],
     "asarUnpack": [
       "talk_daemon/**/*",
+      "scripts/**/*",
       "pyproject.toml",
       "uv.lock",
       "README.md"

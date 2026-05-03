@@ -282,8 +282,8 @@ function startDaemon() {
   
   console.log('Using Python:', pythonCommand);
 
-  daemonProcess = spawn(pythonCommand, ['-m', 'talk_daemon.server'], {
-    cwd: app.getAppPath(),
+  daemonProcess = spawn('uv', ['run', 'python', '-m', 'talk_daemon.server'], {
+    cwd: app.getAppPath().replace(/app\.asar$/, 'app.asar.unpacked'),
     stdio: 'pipe',  // Changed back to 'pipe' for proper event handling
     windowsHide: true,
     env: {
@@ -343,7 +343,7 @@ function startHotkey() {
     return;
   }
 
-  const scriptPath = path.join(app.getAppPath(), 'scripts', 'hotkey.ahk');
+  const scriptPath = path.join(app.getAppPath().replace(/app\.asar$/, 'app.asar.unpacked'), 'scripts', 'hotkey.ahk');
 
   if (!fs.existsSync(scriptPath)) {
     console.error('Hotkey script not found:', scriptPath);
@@ -556,7 +556,7 @@ async function injectText(text) {
     return false;
   }
 
-  const scriptPath = path.join(app.getAppPath(), 'scripts', 'inject.ahk');
+  const scriptPath = path.join(app.getAppPath().replace(/app\.asar$/, 'app.asar.unpacked'), 'scripts', 'inject.ahk');
 
   if (!fs.existsSync(scriptPath)) {
     clipboard.writeText(text);
@@ -565,7 +565,7 @@ async function injectText(text) {
 
   return new Promise((resolve) => {
     const child = spawn(ahkPath, [scriptPath, text], {
-      cwd: app.getAppPath(),
+      cwd: app.getAppPath().replace(/app\.asar$/, 'app.asar.unpacked'),
       windowsHide: true,
     });
 
