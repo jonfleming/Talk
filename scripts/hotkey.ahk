@@ -18,6 +18,8 @@ Log(text)
 ReadConfig()
 {
     configPath := A_AppData . "\flow\config.json"
+    Log("AHK: Reading config from " . configPath)
+
     if !FileExist(configPath)
         return "Ctrl+Alt+D"  ; default
     try
@@ -55,14 +57,14 @@ ConvertHotkey(humanHotkey)
         else if (part = "Meta")
             result .= "#"
         else
-            result .= StrLower(part)
+            result .= part
     }
     return result
 }
 
 Browser_Search:: ; Send configured hotkey
 {
-    Log "AHK: Browser Search hotkey pressed"
+    Log "AHK: hotkey pressed"
     configHotkey := ReadConfig()
     ahkHotkey := ConvertHotkey(configHotkey)
     Log "AHK: " . configHotkey " converted to " . ahkHotkey

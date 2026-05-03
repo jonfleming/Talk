@@ -1,5 +1,5 @@
 {
-  "name": "flow-desktop",
+  "name": "flow",
   "version": "0.1.2",
   "private": true,
   "description": "Lightweight Windows dictation app with Electron, faster-whisper, and AutoHotkey injection.",

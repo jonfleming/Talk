@@ -55,6 +55,5 @@ document.addEventListener('DOMContentLoaded', async () => {
       language: form.language.value,
     };
     await window.flowApi.setConfig(patch);
-    alert('Settings saved!');
   });
 });
