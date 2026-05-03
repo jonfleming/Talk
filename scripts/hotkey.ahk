@@ -43,6 +43,35 @@ ReadConfig()
 
 ConvertHotkey(humanHotkey)
 {
+    specialKeys := Map(
+        "Space", "{Space}",
+        "Tab", "{Tab}",
+        "Capslock", "{Capslock}",
+        "Numlock", "{Numlock}",
+        "Scrolllock", "{Scrolllock}",
+        "Backspace", "{BS}",
+        "Del", "{Del}",
+        "Delete", "{Del}",
+        "Insert", "{Ins}",
+        "Enter", "{Enter}",
+        "Up", "{Up}",
+        "Down", "{Down}",
+        "Left", "{Left}",
+        "Right", "{Right}",
+        "End", "{End}",
+        "PageUp", "{PageUp}",
+        "PageDown", "{PageDown}",
+        "Esc", "{Esc}",
+        "VolumeUp", "{Volume_Up}",
+        "VolumeDown", "{Volume_Down}",
+        "VolumeMute", "{Volume_Mute}",
+        "MediaNextTrack", "{Media_Next}",
+        "MediaPreviousTrack", "{Media_Prev}",
+        "MediaStop", "{Media_Stop}",
+        "MediaPlayPause", "{Media_Play_Pause}",
+        "PrintScreen", "{PrintScreen}"
+    )
+    
     parts := StrSplit(humanHotkey, "+")
     result := ""
     for part in parts
@@ -56,8 +85,12 @@ ConvertHotkey(humanHotkey)
             result .= "+"
         else if (part = "Meta")
             result .= "#"
+        else if (specialKeys.Has(part))
+            result .= specialKeys[part]
+        else if (RegExMatch(part, "^F(1[0-2]|[1-9])$"))
+            result .= "{" . part . "}"
         else
-            result .= part
+            result .= StrLower(part)
     }
     return result
 }
