@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('talkApi', {
   getConfig: () => ipcRenderer.invoke('config:get'),
   setConfig: (patch) => ipcRenderer.invoke('config:set', patch),
   openSettings: () => ipcRenderer.invoke('settings:open'),
+  closeSettings: () => ipcRenderer.invoke('settings:close'),
   quitApp: () => ipcRenderer.invoke('app:quit'),
   onState: (handler) => {
     const listener = (_event, payload) => handler(payload);

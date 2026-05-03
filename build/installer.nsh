@@ -5,6 +5,6 @@
   FileWrite $0 '{"hotkey": "F4", "model": "small.en", "language": "en"}'
   FileClose $0
 
-  ; Run uv sync after installation to set up Python dependencies
-  nsExec::ExecToLog "cmd /c cd /d $\"$INSTDIR$\" && uv sync"
+  ; Run uv sync in the unpacked app project directory so runtime uses the same environment
+  nsExec::ExecToLog "cmd /c cd /d $\"$INSTDIR\resources\app.asar.unpacked$\" && uv sync"
 !macroend

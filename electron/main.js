@@ -242,7 +242,9 @@ function openSettingsWindow() {
 function startDaemon() {
   daemonFailure = null;
   const appPath = app.getAppPath();
+  const unpackedAppPath = appPath.replace(/app\.asar$/, 'app.asar.unpacked');
   console.log('App path:', appPath);
+  console.log('Daemon project path:', unpackedAppPath);
   
   // Try multiple Python executable options
   const pythonOptions = [];
@@ -252,8 +254,8 @@ function startDaemon() {
     pythonOptions.push(process.env.TALK_PYTHON_PATH);
   }
   
-  // Check local virtual environment
-  const localPython = path.join(appPath, '.venv', 'Scripts', 'python.exe');
+  // Check bundled virtual environment inside unpacked app resources
+  const localPython = path.join(unpackedAppPath, '.venv', 'Scripts', 'python.exe');
   if (fs.existsSync(localPython)) {
     const resolvedPath = path.resolve(localPython);
     console.log('Resolved Python path:', resolvedPath);
@@ -282,12 +284,22 @@ function startDaemon() {
   
   console.log('Using Python:', pythonCommand);
 
-  daemonProcess = spawn('uv', ['run', 'python', '-m', 'talk_daemon.server'], {
-    cwd: app.getAppPath().replace(/app\.asar$/, 'app.asar.unpacked'),
+  let daemonCommand = 'uv';
+  let daemonArgs = ['run', '--project', unpackedAppPath, 'python', '-m', 'talk_daemon.server'];
+
+  // Prefer the bundled venv python when available, avoid relying on global uv runtime state.
+  if (path.isAbsolute(pythonCommand) && fs.existsSync(pythonCommand)) {
+    daemonCommand = pythonCommand;
+    daemonArgs = ['-m', 'talk_daemon.server'];
+  }
+
+  daemonProcess = spawn(daemonCommand, daemonArgs, {
+    cwd: unpackedAppPath,
     stdio: 'pipe',  // Changed back to 'pipe' for proper event handling
     windowsHide: true,
     env: {
       ...process.env,
+      PYTHONPATH: unpackedAppPath,
       TALK_DAEMON_PORT: String(daemonPort),
       TALK_DATABASE_PATH: path.join(app.getPath('userData'), 'talk.db'),
       TALK_MODEL: cfg.model,
@@ -625,7 +637,6 @@ function setupIpc() {
   ipcMain.handle('config:get', () => cfg);
 
   ipcMain.handle('config:set', (_event, patch) => {
-    const oldCfg = { ...cfg };
     cfg = config.save(patch);
     if (patch.hotkey) {
       registerHotkeys();
@@ -644,6 +655,11 @@ function setupIpc() {
   });
 
   ipcMain.handle('settings:open', () => openSettingsWindow());
+  ipcMain.handle('settings:close', () => {
+    if (settingsWindow) {
+      settingsWindow.close();
+    }
+  });
   ipcMain.handle('app:quit', () => app.quit());
 }
 

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const setHotkeyBtn = document.getElementById('set-hotkey');
 
   // Load current config
-  const config = await window.talkApi.getConfig();
+  const config = await globalThis.talkApi.getConfig();
   form.model.value = config.model;
   form.hotkey.value = config.hotkey;
   form.injectionMode.value = config.injectionMode;
@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       injectionMode: form.injectionMode.value,
       language: form.language.value,
     };
-    await window.talkApi.setConfig(patch);
+    await globalThis.talkApi.setConfig(patch);
+    await globalThis.talkApi.closeSettings();
   });
 });
