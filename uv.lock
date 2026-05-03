@@ -219,8 +219,8 @@ wheels = [
 ]
 
 [[package]]
-name = "flow"
-version = "0.1.0"
+name = "talk"
+version = "0.1.3"
 source = { editable = "." }
 dependencies = [
     { name = "faster-whisper" },

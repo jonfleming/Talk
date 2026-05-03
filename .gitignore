@@ -2,7 +2,7 @@ node_modules/
 .venv/
 __pycache__/
 *.pyc
-.flow/
+.talk/
 dist/
 *.db
 *.db-shm

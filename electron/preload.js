@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('flowApi', {
+contextBridge.exposeInMainWorld('talkApi', {
   listHistory: (limit = 100) => ipcRenderer.invoke('history:list', { limit }),
   getState: () => ipcRenderer.invoke('state:get'),
   toggleDictation: () => ipcRenderer.invoke('dictation:toggle'),

@@ -9,22 +9,22 @@ from typing import Any
 
 from websockets.asyncio.server import ServerConnection, serve
 
-from flow_daemon.audio import Recorder
-from flow_daemon.storage import Storage
-from flow_daemon.transcription import WhisperEngine
+from talk_daemon.audio import Recorder
+from talk_daemon.storage import Storage
+from talk_daemon.transcription import WhisperEngine
 
 STATE_CHANGED_EVENT = "state.changed"
 TRANSCRIPT_FINAL_EVENT = "transcript.final"
 TRANSCRIPT_PARTIAL_EVENT = "transcript.partial"
 
 
-class FlowDaemon:
+class TalkDaemon:
     def __init__(self) -> None:
-        self.model_name = os.getenv("FLOW_MODEL", "small.en")
-        self.language = os.getenv("FLOW_LANGUAGE", "en")
+        self.model_name = os.getenv("TALK_MODEL", "small.en")
+        self.language = os.getenv("TALK_LANGUAGE", "en")
         self.recorder = Recorder()
         self.engine = WhisperEngine(model_name=self.model_name)
-        db_path = os.getenv("FLOW_DATABASE_PATH", Path(".flow") / "history.db")
+        db_path = os.getenv("TALK_DATABASE_PATH", Path(".talk") / "history.db")
         self.storage = Storage(Path(db_path))
         self.clients: set[ServerConnection] = set()
         self.current_session_id: int | None = None
@@ -185,16 +185,16 @@ class FlowDaemon:
 
 
 async def run() -> None:
-    daemon = FlowDaemon()
-    host = os.getenv("FLOW_DAEMON_HOST", "127.0.0.1")
-    port = int(os.getenv("FLOW_DAEMON_PORT", "8765"))
+    daemon = TalkDaemon()
+    host = os.getenv("TALK_DAEMON_HOST", "127.0.0.1")
+    port = int(os.getenv("TALK_DAEMON_PORT", "8765"))
     async with serve(daemon.handle, host, port):
-        print(f"Flow daemon listening on ws://{host}:{port}")
+        print(f"Talk daemon listening on ws://{host}:{port}")
         await asyncio.Future()
 
 
 def main() -> None:
-    print("Starting Flow daemon main...")
+    print("Starting Talk daemon main...")
     try:
         print("Calling asyncio.run...")
         asyncio.run(run())

@@ -21,9 +21,9 @@ let currentState = null;
 async function refresh() {
   try {
     const [state, items, config] = await Promise.all([
-      window.flowApi.getState().catch(() => ({ recording: false, model: 'small.en', language: 'en', connected: false })),
-      window.flowApi.listHistory(100).catch(() => []),
-      window.flowApi.getConfig().catch(() => ({ hotkey: 'Ctrl+Alt+D', model: 'small.en', language: 'en', injectionMode: 'autohotkey' })),
+      window.talkApi.getState().catch(() => ({ recording: false, model: 'small.en', language: 'en', connected: false })),
+      window.talkApi.listHistory(100).catch(() => []),
+      window.talkApi.getConfig().catch(() => ({ hotkey: 'Ctrl+Alt+D', model: 'small.en', language: 'en', injectionMode: 'autohotkey' })),
     ]);
     if (state.connected === false) {
       emptyState.textContent = 'Connecting to daemon...';
@@ -42,7 +42,7 @@ async function refresh() {
     console.error('Error refreshing history:', error);
     // Fallback: try to get config at least
     try {
-      const config = await window.flowApi.getConfig().catch(() => ({ hotkey: 'Ctrl+Alt+D', model: 'small.en', language: 'en', injectionMode: 'autohotkey' }));
+      const config = await window.talkApi.getConfig().catch(() => ({ hotkey: 'Ctrl+Alt+D', model: 'small.en', language: 'en', injectionMode: 'autohotkey' }));
       renderConfig(config);
     } catch (e) {
       console.error('Error loading config:', e);
@@ -104,7 +104,7 @@ function renderItems(items) {
 }
 
 toggleButton.addEventListener('click', async () => {
-  await window.flowApi.toggleDictation();
+  await window.talkApi.toggleDictation();
 });
 
 refreshButton.addEventListener('click', refresh);
@@ -116,19 +116,19 @@ menuButton.addEventListener('click', (event) => {
 
 startDictationMenu.addEventListener('click', async (event) => {
   event.stopPropagation();
-  await window.flowApi.toggleDictation();
+  await window.talkApi.toggleDictation();
   dropdownMenu.hidden = true;
 });
 
 settingsMenu.addEventListener('click', async (event) => {
   event.stopPropagation();
-  await window.flowApi.openSettings();
+  await window.talkApi.openSettings();
   dropdownMenu.hidden = true;
 });
 
 quitMenu.addEventListener('click', async (event) => {
   event.stopPropagation();
-  await window.flowApi.quitApp();
+  await window.talkApi.quitApp();
 });
 
 // Close menu when clicking outside
@@ -138,20 +138,20 @@ document.addEventListener('click', (event) => {
   }
 });
 
-window.flowApi.onState((newState) => {
+window.talkApi.onState((newState) => {
   renderState(newState);
   if (newState.connected && (!currentState || !currentState.connected)) {
     refresh();
   }
   currentState = newState;
 });
-window.flowApi.onTranscript(() => refresh());
-window.flowApi.onPartialTranscript((data) => {
+window.talkApi.onTranscript(() => refresh());
+window.talkApi.onPartialTranscript((data) => {
   liveTranscriptText.textContent = data.text;
 });
 
 // Load config immediately on startup
-window.flowApi.getConfig().then(config => {
+window.talkApi.getConfig().then(config => {
   renderConfig(config);
   // Now load history after config is loaded
   refresh();

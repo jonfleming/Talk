@@ -1,4 +1,4 @@
-from flow_daemon.server import main as run_daemon
+from talk_daemon.server import main as run_daemon
 
 
 def main() -> None:

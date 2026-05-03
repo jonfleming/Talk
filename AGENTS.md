@@ -1,8 +1,8 @@
-# Flow: Windows Dictation App Architecture
+# Talk: Windows Dictation App Architecture
 
 ## Purpose
 
-Flow is a lightweight, local Windows dictation application designed for fast, private speech-to-text transcription with minimal latency. It provides a global hotkey-based interface for recording audio, transcribing it locally using Whisper models, and injecting the text into the active window.
+Talk is a lightweight, local Windows dictation application designed for fast, private speech-to-text transcription with minimal latency. It provides a global hotkey-based interface for recording audio, transcribing it locally using Whisper models, and injecting the text into the active window.
 
 ### Core Goals
 - **Privacy**: All processing happens locally, no audio leaves the device
@@ -13,7 +13,7 @@ Flow is a lightweight, local Windows dictation application designed for fast, pr
 
 ## Architecture Overview
 
-Flow follows a distributed architecture with clear separation of concerns:
+Talk follows a distributed architecture with clear separation of concerns:
 
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐
@@ -43,7 +43,7 @@ Flow follows a distributed architecture with clear separation of concerns:
 - **Global Hotkeys**: System-wide keyboard shortcuts
 - **Daemon Management**: Spawning and monitoring the Python daemon
 
-#### Python Daemon (`flow_daemon/`)
+#### Python Daemon (`talk_daemon/`)
 - **WebSocket Server**: Real-time communication with Electron
 - **Audio Recording**: Microphone capture using sounddevice
 - **Transcription**: Local Whisper model inference
@@ -267,4 +267,4 @@ Flow follows a distributed architecture with clear separation of concerns:
 - **Updates**: Auto-update mechanism for future versions
 
 This architecture provides a solid foundation for a reliable, performant dictation application while maintaining clear separation of concerns and room for future enhancements.</content>
-<parameter name="filePath">c:\Projects\flow\AGENTS.md
+<parameter name="filePath">c:\Projects\talk\AGENTS.md

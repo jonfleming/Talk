@@ -1,13 +1,13 @@
 {
-  "name": "flow",
-  "version": "0.1.2",
+  "name": "talk",
+  "version": "0.1.3",
   "private": true,
   "description": "Lightweight Windows dictation app with Electron, faster-whisper, and AutoHotkey injection.",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "daemon": "uv run python -m flow_daemon.server",
+    "daemon": "uv run python -m talk_daemon.server",
     "build": "electron-builder",
     "dist": "electron-builder --publish=never"
   },
@@ -19,14 +19,14 @@
     "electron-builder": "^26.8.1"
   },
   "build": {
-    "appId": "com.flow.desktop",
-    "productName": "Flow",
+    "appId": "com.talk.desktop",
+    "productName": "Talk",
     "directories": {
       "output": "dist"
     },
     "files": [
       "electron/**/*",
-      "flow_daemon/**/*",
+      "talk_daemon/**/*",
       "scripts/**/*",
       "pyproject.toml",
       "uv.lock",
@@ -35,7 +35,7 @@
       "!**/__pycache__"
     ],
     "asarUnpack": [
-      "flow_daemon/**/*",
+      "talk_daemon/**/*",
       "pyproject.toml",
       "uv.lock",
       "README.md"
@@ -46,7 +46,8 @@
     "nsis": {
       "oneClick": false,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "include": "build/installer.nsh"
     }
   }
 }

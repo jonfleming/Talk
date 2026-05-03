@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "flow"
+name = "talk"
 version = "0.1.0"
-description = "Local Windows dictation daemon for the Flow desktop app"
+description = "Local Windows dictation daemon for the Talk desktop app"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -16,14 +16,14 @@ dependencies = [
 ]
 
 [project.scripts]
-flow-daemon = "flow_daemon.server:main"
+talk-daemon = "talk_daemon.server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["flow_daemon"]
+packages = ["talk_daemon"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-	"/flow_daemon",
+	"/talk_daemon",
 	"/main.py",
 	"/README.md",
 ]

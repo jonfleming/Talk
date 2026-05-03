@@ -17,7 +17,7 @@ Log(text)
 
 ReadConfig()
 {
-    configPath := A_AppData . "\flow\config.json"
+    configPath := A_AppData . "\talk\config.json"
     Log("AHK: Reading config from " . configPath)
 
     if !FileExist(configPath)

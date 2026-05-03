@@ -1,4 +1,4 @@
-# Flow
+# Talk
 
 Lightweight Windows dictation app scaffold built around Electron, a local Python faster-whisper daemon, and AutoHotkey text injection.
 
@@ -6,7 +6,7 @@ Lightweight Windows dictation app scaffold built around Electron, a local Python
 
 - Electron tray app with a global toggle hotkey
 - Python WebSocket daemon that records microphone audio and transcribes locally
-- SQLite-backed transcript history stored in `%APPDATA%\flow\flow.db`
+- SQLite-backed transcript history stored in `%APPDATA%\talk\talk.db`
 - AutoHotkey v2 injection bridge that pastes text into the active window
 
 ## Current MVP behavior
@@ -24,7 +24,7 @@ This scaffold is optimized for a fast local iteration loop. It does not yet impl
 - Windows
 - `uv`
 - Node.js
-- AutoHotkey v2 available as `AutoHotkey.exe` on `PATH`, or set `FLOW_AHK_PATH`
+- AutoHotkey v2 available as `AutoHotkey.exe` on `PATH`, or set `TALK_AHK_PATH`
 
 ## Python setup
 
@@ -47,7 +47,7 @@ npm start
 The Electron process will launch the Python daemon with:
 
 ```powershell
-uv run python -m flow_daemon.server
+uv run python -m talk_daemon.server
 ```
 
 ## Packaging for distribution
@@ -58,7 +58,7 @@ To build a Windows installer:
 npm run dist
 ```
 
-This creates `dist/Flow Setup 0.1.0.exe`, a Windows NSIS installer that includes all necessary files.
+This creates `dist/Talk Setup 0.1.0.exe`, a Windows NSIS installer that includes all necessary files.
 
 ## Installation on another machine
 
@@ -67,9 +67,9 @@ This creates `dist/Flow Setup 0.1.0.exe`, a Windows NSIS installer that includes
    - Node.js (for running the installer, if needed)
    - AutoHotkey v2
 
-2. Run the installer `Flow Setup 0.1.x.exe`
+2. Run the installer `Talk Setup 0.1.x.exe`
 
-3. In the installation directory (default: `C:\Users\<username>\AppData\Local\Programs\flow-desktop`), install Python dependencies:
+3. In the installation directory (default: `C:\Users\<username>\AppData\Local\Programs\talk-desktop`), install Python dependencies:
 4.  
 
    ```powershell
@@ -78,13 +78,13 @@ This creates `dist/Flow Setup 0.1.0.exe`, a Windows NSIS installer that includes
 
 5. Launch the app from the Start Menu or desktop shortcut.
 
-The app will create its database at `%APPDATA%\flow\flow.db` and config at `%APPDATA%\flow\config.json`.
+The app will create its database at `%APPDATA%\talk\talk.db` and config at `%APPDATA%\talk\config.json`.
 
 ## Useful environment variables
 
-- `FLOW_MODEL`: Whisper model name, defaults to `small.en`
-- `FLOW_LANGUAGE`: Language hint, defaults to `en`
-- `FLOW_AHK_PATH`: Absolute path to `AutoHotkey.exe` if it is not on `PATH`
+- `TALK_MODEL`: Whisper model name, defaults to `small.en`
+- `TALK_LANGUAGE`: Language hint, defaults to `en`
+- `TALK_AHK_PATH`: Absolute path to `AutoHotkey.exe` if it is not on `PATH`
 
 ## Suggested next improvements
 

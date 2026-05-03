@@ -119,7 +119,7 @@ function makeTrayIcon(recording) {
 
 function createTray() {
   tray = new Tray(makeTrayIcon(false));
-  tray.setToolTip('Flow');
+  tray.setToolTip('Talk');
   refreshTrayMenu();
 }
 
@@ -200,7 +200,7 @@ function openHistoryWindow() {
   historyWindow = new BrowserWindow({
     width: 920,
     height: 680,
-    title: 'Flow History',
+    title: 'Talk History',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -224,7 +224,7 @@ function openSettingsWindow() {
   settingsWindow = new BrowserWindow({
     width: 600,
     height: 400,
-    title: 'Flow Settings',
+    title: 'Talk Settings',
     autoHideMenuBar: true,
     resizable: false,
     webPreferences: {
@@ -248,8 +248,8 @@ function startDaemon() {
   const pythonOptions = [];
   
   // Check for environment variable first
-  if (process.env.FLOW_PYTHON_PATH) {
-    pythonOptions.push(process.env.FLOW_PYTHON_PATH);
+  if (process.env.TALK_PYTHON_PATH) {
+    pythonOptions.push(process.env.TALK_PYTHON_PATH);
   }
   
   // Check local virtual environment
@@ -282,16 +282,16 @@ function startDaemon() {
   
   console.log('Using Python:', pythonCommand);
 
-  daemonProcess = spawn(pythonCommand, ['-m', 'flow_daemon.server'], {
+  daemonProcess = spawn(pythonCommand, ['-m', 'talk_daemon.server'], {
     cwd: app.getAppPath(),
     stdio: 'pipe',  // Changed back to 'pipe' for proper event handling
     windowsHide: true,
     env: {
       ...process.env,
-      FLOW_DAEMON_PORT: String(daemonPort),
-      FLOW_DATABASE_PATH: path.join(app.getPath('userData'), 'flow.db'),
-      FLOW_MODEL: cfg.model,
-      FLOW_LANGUAGE: cfg.language,
+      TALK_DAEMON_PORT: String(daemonPort),
+      TALK_DATABASE_PATH: path.join(app.getPath('userData'), 'talk.db'),
+      TALK_MODEL: cfg.model,
+      TALK_LANGUAGE: cfg.language,
     },
   });
 
@@ -307,7 +307,7 @@ function startDaemon() {
 
   daemonProcess.on('error', (error) => {
     console.error(`Failed to start daemon: ${error.message}`);
-    daemonFailure = new Error(`Failed to start Flow daemon: ${error.message}`);
+    daemonFailure = new Error(`Failed to start Talk daemon: ${error.message}`);
     currentState = { ...currentState, connected: false, startupError: daemonFailure.message };
     broadcastState();
   });
@@ -316,14 +316,14 @@ function startDaemon() {
     console.error(`Daemon exited with code ${code ?? 'unknown'}`);
     daemonProcess = null;
     socketOpen = false;
-    daemonFailure = new Error(`Flow daemon exited with code ${code ?? 'unknown'}. Check the terminal for the startup error.`);
+    daemonFailure = new Error(`Talk daemon exited with code ${code ?? 'unknown'}. Check the terminal for the startup error.`);
     currentState = { ...currentState, connected: false, startupError: daemonFailure.message };
     broadcastState();
   });
 }
 
 function startHotkey() {
-  let ahkPath = process.env.FLOW_AHK_PATH;
+  let ahkPath = process.env.TALK_AHK_PATH;
   if (!ahkPath) {
     // Try common paths
     const possiblePaths = [
@@ -444,7 +444,7 @@ async function waitForDaemonConnection(timeoutMs = DAEMON_CONNECT_TIMEOUT_MS) {
     new Promise((_, reject) => {
       setTimeout(() => {
         const seconds = Math.round(timeoutMs / 1000);
-        reject(new Error(`Flow daemon did not connect within ${seconds} seconds. Check the terminal for startup errors.`));
+        reject(new Error(`Talk daemon did not connect within ${seconds} seconds. Check the terminal for startup errors.`));
       }, timeoutMs);
     }),
   ]);
@@ -507,7 +507,7 @@ async function toggleDictation() {
     await sendCommand('dictation.toggle');
   } catch (error) {
     new Notification({
-      title: 'Flow',
+      title: 'Talk',
       body: error.message,
     }).show();
   }
@@ -527,7 +527,7 @@ async function handleTranscript(transcript) {
   });
 
   const body = injected ? transcript.text : 'Transcript copied to clipboard. AutoHotkey injection not available.';
-  new Notification({ title: 'Flow', body, silent: true }).show();
+  new Notification({ title: 'Talk', body, silent: true }).show();
 }
 
 async function injectText(text) {
@@ -536,7 +536,7 @@ async function injectText(text) {
     return false;
   }
 
-  let ahkPath = process.env.FLOW_AHK_PATH;
+  let ahkPath = process.env.TALK_AHK_PATH;
   if (!ahkPath) {
     // Try common paths
     const possiblePaths = [
