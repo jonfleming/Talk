@@ -8,6 +8,7 @@ const DEFAULTS = {
   language: 'en',
   daemonHost: '127.0.0.1',
   injectionMode: 'autohotkey',
+  notificationsEnabled: true,
 };
 
 function configPath() {

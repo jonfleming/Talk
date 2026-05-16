@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   form.hotkey.value = config.hotkey;
   form.injectionMode.value = config.injectionMode;
   form.language.value = config.language;
+  form.notificationsEnabled.checked = config.notificationsEnabled !== false;
 
   // Hotkey capture
   let capturing = false;
@@ -53,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       hotkey: form.hotkey.value,
       injectionMode: form.injectionMode.value,
       language: form.language.value,
+      notificationsEnabled: form.notificationsEnabled.checked,
     };
     await globalThis.talkApi.setConfig(patch);
     await globalThis.talkApi.closeSettings();

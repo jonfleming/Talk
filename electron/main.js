@@ -518,10 +518,12 @@ async function toggleDictation() {
   try {
     await sendCommand('dictation.toggle');
   } catch (error) {
-    new Notification({
-      title: 'Talk',
-      body: error.message,
-    }).show();
+    if (cfg.notificationsEnabled !== false) {
+      new Notification({
+        title: 'Talk',
+        body: error.message,
+      }).show();
+    }
   }
 }
 
@@ -538,8 +540,10 @@ async function handleTranscript(transcript) {
     window.webContents.send('transcript:final', { ...transcript, injected });
   });
 
-  const body = injected ? transcript.text : 'Transcript copied to clipboard. AutoHotkey injection not available.';
-  new Notification({ title: 'Talk', body, silent: true }).show();
+  if (cfg.notificationsEnabled !== false) {
+    const body = injected ? transcript.text : 'Transcript copied to clipboard. AutoHotkey injection not available.';
+    new Notification({ title: 'Talk', body, silent: true }).show();
+  }
 }
 
 async function injectText(text) {

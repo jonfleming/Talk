@@ -21,14 +21,28 @@ if (text = "") {
 }
 
 originalClipboard := ClipboardAll()
+injected := false
 try {
     A_Clipboard := text
-    ClipWait 0.5
+  if ClipWait(0.5, 1) {
     Send "^v"
+    injected := true
+  }
 } catch {
+}
+
+if !injected {
+  try {
     SendText text
+    injected := true
+  } catch {
+  }
 }
 
 Sleep 100
-A_Clipboard := originalClipboard
-ExitApp 0
+try {
+  A_Clipboard := originalClipboard
+} catch {
+}
+
+ExitApp injected ? 0 : 2
