@@ -95,7 +95,7 @@ ConvertHotkey(humanHotkey)
     return result
 }
 
-Browser_Search:: ; Send configured hotkey
+Browser_Home:: ; Send configured hotkey
 {
     Log "AHK: hotkey pressed"
     configHotkey := ReadConfig()
