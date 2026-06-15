@@ -304,6 +304,7 @@ function startDaemon() {
       TALK_DATABASE_PATH: path.join(app.getPath('userData'), 'talk.db'),
       TALK_MODEL: cfg.model,
       TALK_LANGUAGE: cfg.language,
+      PYTHONUNBUFFERED: '1',
     },
   });
 

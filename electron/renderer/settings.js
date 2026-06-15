@@ -34,11 +34,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.altKey) parts.push('Alt');
     if (e.shiftKey) parts.push('Shift');
     if (e.metaKey) parts.push('Meta');
+    
+    let hasNonModifier = false;
     if (e.key && !['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) {
       parts.push(e.key.toUpperCase());
+      hasNonModifier = true;
     }
-    // Require at least one modifier
-    if (parts.length > 1) {
+    
+    // Require at least one modifier and a non-modifier key
+    const hasModifier = e.ctrlKey || e.altKey || e.shiftKey || e.metaKey;
+    if (hasModifier && hasNonModifier) {
       hotkeyInput.value = parts.join('+');
       capturing = false;
       setHotkeyBtn.textContent = 'Set Hotkey';
