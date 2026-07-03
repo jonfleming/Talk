@@ -50,6 +50,16 @@ The Electron process will launch the Python daemon with:
 uv run python -m talk_daemon.server
 ```
 
+## Building for development
+
+To build the app locally (no installer):
+
+```powershell
+npm run build
+```
+
+This produces an unpacked Electron app in `dist/` suitable for local testing.
+
 ## Packaging for distribution
 
 To build a Windows installer:
@@ -58,7 +68,24 @@ To build a Windows installer:
 npm run dist
 ```
 
-This creates `dist/Talk Setup 0.1.0.exe`, a Windows NSIS installer that includes all necessary files.
+This creates `dist/Talk Setup 0.1.9.exe`, a Windows NSIS installer that includes all necessary files.
+
+## Deployment
+
+Copy `dist/Talk Setup 0.1.x.exe` to the target machine and run it. The installer will:
+
+1. Install Talk to `C:\Users\<username>\AppData\Local\Programs\talk-desktop`
+2. Create a Start Menu entry and desktop shortcut
+3. Register the global hotkey (`Ctrl+Alt+D` by default)
+
+After installation, the user must install Python dependencies in the installation directory:
+
+```powershell
+cd "C:\Users\<username>\AppData\Local\Programs\talk-desktop"
+uv sync
+```
+
+Then launch from the Start Menu or desktop shortcut.
 
 ## Installation on another machine
 
@@ -70,13 +97,12 @@ This creates `dist/Talk Setup 0.1.0.exe`, a Windows NSIS installer that includes
 2. Run the installer `Talk Setup 0.1.x.exe`
 
 3. In the installation directory (default: `C:\Users\<username>\AppData\Local\Programs\talk-desktop`), install Python dependencies:
-4.  
 
    ```powershell
    uv sync
    ```
 
-5. Launch the app from the Start Menu or desktop shortcut.
+4. Launch the app from the Start Menu or desktop shortcut.
 
 The app will create its database at `%APPDATA%\talk\talk.db` and config at `%APPDATA%\talk\config.json`.
 
