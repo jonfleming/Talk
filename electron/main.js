@@ -632,7 +632,8 @@ function setupIpc() {
   });
 
   ipcMain.handle('state:get', async () => {
-    currentState = await sendCommandOrFallback('state.get', {}, currentState);
+    const daemonState = await sendCommandOrFallback('state.get', {}, currentState);
+    currentState = { ...daemonState, connected: true, startupError: null };
     refreshTrayMenu();
     return currentState;
   });
