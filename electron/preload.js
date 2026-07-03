@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('talkApi', {
+  getAppVersion: () => ipcRenderer.invoke('app:getVersion'),
   listHistory: (limit = 100) => ipcRenderer.invoke('history:list', { limit }),
   getState: () => ipcRenderer.invoke('state:get'),
   toggleDictation: () => ipcRenderer.invoke('dictation:toggle'),

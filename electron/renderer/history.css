@@ -67,6 +67,13 @@ h1 {
   font-family: Georgia, "Times New Roman", serif;
 }
 
+#version {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
 .lede {
   max-width: 620px;
   color: var(--muted);

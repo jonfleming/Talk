@@ -8,6 +8,12 @@ h1 {
   color: #333;
 }
 
+#version {
+  margin: 2px 0 16px;
+  font-size: 13px;
+  color: #888;
+}
+
 .setting {
   margin-bottom: 15px;
 }

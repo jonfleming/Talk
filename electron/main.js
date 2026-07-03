@@ -665,6 +665,7 @@ function setupIpc() {
       settingsWindow.close();
     }
   });
+  ipcMain.handle('app:getVersion', () => app.getVersion());
   ipcMain.handle('app:quit', () => app.quit());
 }
 

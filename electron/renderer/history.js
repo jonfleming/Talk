@@ -1,3 +1,8 @@
+window.talkApi.getAppVersion().then(version => {
+  const versionEl = document.getElementById('version');
+  if (versionEl) versionEl.textContent = `Talk v${version}`;
+});
+
 const historyList = document.getElementById('historyList');
 const emptyState = document.getElementById('emptyState');
 const recordingState = document.getElementById('recordingState');
