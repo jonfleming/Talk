@@ -123,12 +123,21 @@ function createTray() {
   refreshTrayMenu();
 }
 
-function createWaveformWindow() {
-  if (waveformWindow) return;
+function positionWaveformWindow() {
+  if (!waveformWindow) return;
 
   const { screen } = require('electron');
   const primaryDisplay = screen.getPrimaryDisplay();
-  const { width: screenWidth } = primaryDisplay.workAreaSize;
+  const { x: workAreaX, y: workAreaY, width: workAreaWidth } = primaryDisplay.workArea;
+
+  const [windowWidth] = waveformWindow.getSize();
+  const x = Math.floor(workAreaX + ((workAreaWidth - windowWidth) / 2));
+  const y = workAreaY;
+  waveformWindow.setPosition(x, y);
+}
+
+function createWaveformWindow() {
+  if (waveformWindow) return;
 
   const windowWidth = 200;
   const windowHeight = 50;
@@ -136,7 +145,7 @@ function createWaveformWindow() {
   waveformWindow = new BrowserWindow({
     width: windowWidth,
     height: windowHeight,
-    x: Math.floor((screenWidth - windowWidth) / 2),
+    x: 0,
     y: 0,
     frame: false,
     alwaysOnTop: true,
@@ -144,8 +153,11 @@ function createWaveformWindow() {
     resizable: false,
     show: false,
     focusable: false,
+    skipTaskbar: true,
     webPreferences: {},
   });
+
+  positionWaveformWindow();
 
   waveformWindow.loadFile(path.join(__dirname, 'renderer', 'waveform.html'));
 
@@ -184,6 +196,7 @@ function broadcastState() {
 
   if (currentState.recording) {
     if (!waveformWindow) createWaveformWindow();
+    positionWaveformWindow();
     waveformWindow.show();
   } else {
     if (waveformWindow) waveformWindow.hide();
